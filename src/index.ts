@@ -78,7 +78,7 @@ async function setup() {
 		const sealPath = fileExtension === "zip" ?
 			await toolCache.extractZip(file) :
 			await toolCache.extractTar(file);
-		core.info("Extracted seal");
+		core.info(`Extracted seal: ${sealPath}`);
 		if (platform !== "windows") {
 			chmodSync(path.join(sealPath, "seal"), 0o755);
 		}
