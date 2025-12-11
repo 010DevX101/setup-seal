@@ -1,0 +1,29 @@
+{
+  "name": "setup-seal",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/010devx101/setup-seal#readme",
+  "bugs": {
+    "url": "https://github.com/010devx101/setup-seal/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/010devx101/setup-seal.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@actions/core": "^2.0.0",
+    "@actions/github": "^6.0.1",
+    "@actions/tool-cache": "^2.0.2"
+  }
+}

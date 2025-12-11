@@ -1,0 +1,25 @@
+name: setup-seal
+description: Used to programmatically setup the Luau runtime seal
+inputs:
+  token:
+    description: GitHub token to use GitHub REST API
+    required: true
+  version:
+    description: "Seal version to install"
+    required: false
+    default: latest
+  cache:
+    description: "Whether to cache the file or not"
+    required: false
+    default: "true"
+outputs:
+  version:
+    description: "The seal version that was installed"
+  path:
+    description: "The path where seal was installed"
+  cache-hit:
+    description: "Whether a cached file was found and installed or not"
+
+runs:
+  using: node20
+  main: dist/index.js
