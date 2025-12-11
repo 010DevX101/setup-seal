@@ -17,13 +17,17 @@ function getPlatform(): Platform {
 		throw new Error(`Unsupported platform ${platform}!`);
 	}
 }
-function fetchFromCache(version: string) {
+function fetchFromCache(version: string): boolean {
 	const cachedPath = toolCache.find("seal", version);
-	core.addPath(cachedPath);
-	core.info("Added seal to PATH");
-	core.setOutput("cache-hit", true);
-	core.setOutput("path", cachedPath);
-	core.setOutput("version", version);
+	if (cachedPath) {
+		core.addPath(cachedPath);
+		core.info("Added seal to PATH");
+		core.setOutput("cache-hit", true);
+		core.setOutput("path", cachedPath);
+		core.setOutput("version", version);
+		return true;
+	}
+	return false;
 }
 
 async function setup() {
@@ -51,8 +55,8 @@ async function setup() {
 			core.info("Successfully retrieved latest release of seal");
 			const release = response.data;
 			resolvedVersion = release.tag_name;
-			if (shouldCache) {
-				return fetchFromCache(resolvedVersion);
+			if (fetchFromCache(resolvedVersion)) {
+				return;
 			}
 			const asset = release.assets.find(asset => asset.name.includes(`${platform}-${architecture}`));
 			if (!asset) {
@@ -71,7 +75,7 @@ async function setup() {
 			await toolCache.extractTar(file);
 		core.info("Extracted seal");
 		if (shouldCache) {
-			toolCache.cacheFile(sealPath, "seal", resolvedVersion, architecture);
+			await toolCache.cacheDir(sealPath, "seal", resolvedVersion);
 			core.info("Cached seal for future workflows");
 		}
 		core.addPath(sealPath);
