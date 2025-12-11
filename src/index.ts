@@ -17,7 +17,7 @@ function getPlatform(): Platform {
 		throw new Error(`Unsupported platform ${platform}!`);
 	}
 }
-async function fetchFromCache(version: string) {
+function fetchFromCache(version: string) {
 	const cachedPath = toolCache.find("seal", version);
 	core.addPath(cachedPath);
 	core.info("Added seal to PATH");
