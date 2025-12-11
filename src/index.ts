@@ -1,7 +1,9 @@
-import * as core from "@actions/core";
+import core from "@actions/core";
 import { getOctokit } from "@actions/github";
-import * as toolCache from "@actions/tool-cache";
-import * as os from "os";
+import toolCache from "@actions/tool-cache";
+import os from "os";
+import { chmodSync } from "fs";
+import path from "path";
 
 type Platform = "windows" | "macos-darwin" | "linux";
 
@@ -17,9 +19,12 @@ function getPlatform(): Platform {
 		throw new Error(`Unsupported platform ${platform}!`);
 	}
 }
-function fetchFromCache(version: string): boolean {
+function fetchFromCache(version: string, platform: string): boolean {
 	const cachedPath = toolCache.find("seal", version);
 	if (cachedPath) {
+		if (platform !== "windows") {
+			chmodSync(path.join(cachedPath, "seal"), 0o755);
+		}
 		core.addPath(cachedPath);
 		core.info("Added seal to PATH");
 		core.setOutput("cache-hit", true);
@@ -55,7 +60,7 @@ async function setup() {
 			core.info("Successfully retrieved latest release of seal");
 			const release = response.data;
 			resolvedVersion = release.tag_name;
-			if (fetchFromCache(resolvedVersion)) {
+			if (fetchFromCache(resolvedVersion, platform)) {
 				return;
 			}
 			const asset = release.assets.find(asset => asset.name.includes(`${platform}-${architecture}`));
@@ -74,6 +79,9 @@ async function setup() {
 			await toolCache.extractZip(file) :
 			await toolCache.extractTar(file);
 		core.info("Extracted seal");
+		if (platform !== "windows") {
+			chmodSync(path.join(sealPath, "seal"), 0o755);
+		}
 		if (shouldCache) {
 			await toolCache.cacheDir(sealPath, "seal", resolvedVersion);
 			core.info("Cached seal for future workflows");
@@ -83,7 +91,7 @@ async function setup() {
 		core.info("Successfully installed seal!");
 		core.setOutput("cache-hit", false);
 		core.setOutput("path", sealPath);
-		core.setOutput("version", version);
+		core.setOutput("version", resolvedVersion);
 	} catch (err) {
 		core.setFailed((err as Error).message);
 	}
