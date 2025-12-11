@@ -82,11 +82,12 @@ async function setup() {
 		if (platform !== "windows") {
 			chmodSync(path.join(sealPath, "seal"), 0o755);
 		}
+		const binDir = path.join(sealPath, "bin");
 		if (shouldCache) {
-			await toolCache.cacheDir(sealPath, "seal", resolvedVersion);
+			await toolCache.cacheDir(binDir, "seal", resolvedVersion);
 			core.info("Cached seal for future workflows");
 		}
-		core.addPath(sealPath);
+		core.addPath(binDir);
 		core.info("Added seal to PATH");
 		core.info("Successfully installed seal!");
 		core.setOutput("cache-hit", false);
