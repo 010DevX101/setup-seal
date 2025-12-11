@@ -10,15 +10,16 @@
     "type": "git",
     "url": "git+https://github.com/010devx101/setup-seal.git"
   },
-  "license": "ISC",
+  "private": "true",
   "author": "",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+		"package": "ncc build src/index.ts -o dist"
   },
   "devDependencies": {
     "@types/node": "^25.0.0",
+    "@vercel/ncc": "^0.38.4",
     "typescript": "^5.9.3"
   },
   "dependencies": {
