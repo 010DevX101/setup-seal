@@ -35371,18 +35371,48 @@ function wrappy (fn, cb) {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __importDefault(__nccwpck_require__(7484));
+const core = __importStar(__nccwpck_require__(7484));
 const github_1 = __nccwpck_require__(3228);
-const tool_cache_1 = __importDefault(__nccwpck_require__(3472));
-const os_1 = __importDefault(__nccwpck_require__(857));
+const toolCache = __importStar(__nccwpck_require__(3472));
+const os = __importStar(__nccwpck_require__(857));
 const fs_1 = __nccwpck_require__(9896);
-const path_1 = __importDefault(__nccwpck_require__(6928));
+const path = __importStar(__nccwpck_require__(6928));
 function getPlatform() {
-    let platform = os_1.default.platform();
+    let platform = os.platform();
     if (platform === "win32") {
         return "windows";
     }
@@ -35397,16 +35427,16 @@ function getPlatform() {
     }
 }
 function fetchFromCache(version, platform) {
-    const cachedPath = tool_cache_1.default.find("seal", version);
+    const cachedPath = toolCache.find("seal", version);
     if (cachedPath) {
         if (platform !== "windows") {
-            (0, fs_1.chmodSync)(path_1.default.join(cachedPath, "seal"), 0o755);
+            (0, fs_1.chmodSync)(path.join(cachedPath, "seal"), 0o755);
         }
-        core_1.default.addPath(cachedPath);
-        core_1.default.info("Added seal to PATH");
-        core_1.default.setOutput("cache-hit", true);
-        core_1.default.setOutput("path", cachedPath);
-        core_1.default.setOutput("version", version);
+        core.addPath(cachedPath);
+        core.info("Added seal to PATH");
+        core.setOutput("cache-hit", true);
+        core.setOutput("path", cachedPath);
+        core.setOutput("version", version);
         return true;
     }
     return false;
@@ -35415,11 +35445,11 @@ async function setup() {
     const REPOSITORY_OWNER = "seal-runtime";
     const REPOSITORY_NAME = "seal";
     try {
-        const token = core_1.default.getInput("token");
-        const version = core_1.default.getInput("version", { trimWhitespace: true }) || "latest";
-        const shouldCache = core_1.default.getBooleanInput("cache") ?? true;
+        const token = core.getInput("token");
+        const version = core.getInput("version", { trimWhitespace: true }) || "latest";
+        const shouldCache = core.getBooleanInput("cache") ?? true;
         const platform = getPlatform();
-        const architecture = os_1.default.arch();
+        const architecture = os.arch();
         const fileExtension = platform === "windows" ? "zip" : "tar.gz";
         let resolvedVersion;
         let downloadUrl;
@@ -35429,11 +35459,11 @@ async function setup() {
                 owner: REPOSITORY_OWNER,
                 repo: REPOSITORY_NAME
             });
-            core_1.default.info("Retrieving latest release of seal");
+            core.info("Retrieving latest release of seal");
             if (response.status !== 200) {
                 throw new Error("Failed to retrieve latest release");
             }
-            core_1.default.info("Successfully retrieved latest release of seal");
+            core.info("Successfully retrieved latest release of seal");
             const release = response.data;
             resolvedVersion = release.tag_name;
             if (fetchFromCache(resolvedVersion, platform)) {
@@ -35449,29 +35479,29 @@ async function setup() {
             resolvedVersion = version;
             downloadUrl = `https://github.com/${REPOSITORY_OWNER}/${REPOSITORY_NAME}/releases/download/${version}/seal-${version}-${platform}-${architecture}.${fileExtension}`;
         }
-        core_1.default.info(`Downloading seal from ${downloadUrl}`);
-        const file = await tool_cache_1.default.downloadTool(downloadUrl, undefined, token);
-        core_1.default.info("Successfully downloaded seal");
+        core.info(`Downloading seal from ${downloadUrl}`);
+        const file = await toolCache.downloadTool(downloadUrl, undefined, token);
+        core.info("Successfully downloaded seal");
         const sealPath = fileExtension === "zip" ?
-            await tool_cache_1.default.extractZip(file) :
-            await tool_cache_1.default.extractTar(file);
-        core_1.default.info(`Extracted seal: ${sealPath}`);
+            await toolCache.extractZip(file) :
+            await toolCache.extractTar(file);
+        core.info(`Extracted seal: ${sealPath}`);
         if (platform !== "windows") {
-            (0, fs_1.chmodSync)(path_1.default.join(sealPath, "seal"), 0o755);
+            (0, fs_1.chmodSync)(path.join(sealPath, "seal"), 0o755);
         }
         if (shouldCache) {
-            await tool_cache_1.default.cacheDir(sealPath, "seal", resolvedVersion);
-            core_1.default.info("Cached seal for future workflows");
+            await toolCache.cacheDir(sealPath, "seal", resolvedVersion);
+            core.info("Cached seal for future workflows");
         }
-        core_1.default.addPath(sealPath);
-        core_1.default.info("Added seal to PATH");
-        core_1.default.info("Successfully installed seal!");
-        core_1.default.setOutput("cache-hit", false);
-        core_1.default.setOutput("path", sealPath);
-        core_1.default.setOutput("version", resolvedVersion);
+        core.addPath(sealPath);
+        core.info("Added seal to PATH");
+        core.info("Successfully installed seal!");
+        core.setOutput("cache-hit", false);
+        core.setOutput("path", sealPath);
+        core.setOutput("version", resolvedVersion);
     }
     catch (err) {
-        core_1.default.setFailed(err.message);
+        core.setFailed(err.message);
     }
 }
 setup();

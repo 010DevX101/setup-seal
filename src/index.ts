@@ -1,9 +1,9 @@
-import core from "@actions/core";
+import * as core from "@actions/core";
 import { getOctokit } from "@actions/github";
-import toolCache from "@actions/tool-cache";
-import os from "os";
+import * as toolCache from "@actions/tool-cache";
+import * as os from "os";
 import { chmodSync } from "fs";
-import path from "path";
+import * as path from "path";
 
 type Platform = "windows" | "macos-darwin" | "linux";
 
