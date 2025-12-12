@@ -40,12 +40,16 @@ async function setup() {
 	const REPOSITORY_NAME = "seal";
 	try {
 		const token = core.getInput("token");
-		const version = core.getInput("version", { trimWhitespace: true }) || "latest";
 		const shouldCache = core.getBooleanInput("cache") ?? true;
+		const version = core.getInput("version", { trimWhitespace: true }) || "latest";
+		const isLegacyVersion = version.includes("v0.0.5");
+
 		const platform = getPlatform();
 		const architecture = os.arch();
-		const fileExtension = platform === "windows" ? "zip" : "tar.gz";
+
+		const fileExtension = (platform === "windows" || isLegacyVersion) ? "zip" : "tar.gz";
 		const fileName = `seal-${version}-${platform}-${architecture}.${fileExtension}`;
+
 		let resolvedVersion: string;
 		let downloadUrl: string;
 		if (version == "latest") {
@@ -80,16 +84,22 @@ async function setup() {
 			await toolCache.extractZip(file) :
 			await toolCache.extractTar(file);
 		core.info(`Extracted seal: ${sealPath}`);
-		if (version.includes("v0.0.5")) {
+
+		// Support legacy versions
+		if (isLegacyVersion) {
 			sealPath = `${sealPath}/${fileName}`;
 		}
+
+		// Make file executable in MacOS and Linux
 		if (platform !== "windows") {
 			chmodSync(path.join(sealPath, "seal"), 0o755);
 		}
+
 		if (shouldCache) {
 			await toolCache.cacheDir(sealPath, "seal", resolvedVersion);
 			core.info("Cached seal for future workflows");
 		}
+
 		core.addPath(sealPath);
 		core.info("Added seal to PATH");
 		core.info("Successfully installed seal!");

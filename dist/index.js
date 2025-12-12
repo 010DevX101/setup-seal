@@ -35446,11 +35446,13 @@ async function setup() {
     const REPOSITORY_NAME = "seal";
     try {
         const token = core.getInput("token");
-        const version = core.getInput("version", { trimWhitespace: true }) || "latest";
         const shouldCache = core.getBooleanInput("cache") ?? true;
+        const version = core.getInput("version", { trimWhitespace: true }) || "latest";
+        const isLegacyVersion = version.includes("v0.0.5");
         const platform = getPlatform();
         const architecture = os.arch();
-        const fileExtension = platform === "windows" ? "zip" : "tar.gz";
+        const fileExtension = (platform === "windows" || isLegacyVersion) ? "zip" : "tar.gz";
+        const fileName = `seal-${version}-${platform}-${architecture}.${fileExtension}`;
         let resolvedVersion;
         let downloadUrl;
         if (version == "latest") {
@@ -35477,15 +35479,20 @@ async function setup() {
         }
         else {
             resolvedVersion = version;
-            downloadUrl = `https://github.com/${REPOSITORY_OWNER}/${REPOSITORY_NAME}/releases/download/${version}/seal-${version}-${platform}-${architecture}.${fileExtension}`;
+            downloadUrl = `https://github.com/${REPOSITORY_OWNER}/${REPOSITORY_NAME}/releases/download/${version}/${fileName}`;
         }
         core.info(`Downloading seal from ${downloadUrl}`);
         const file = await toolCache.downloadTool(downloadUrl, undefined, token);
         core.info("Successfully downloaded seal");
-        const sealPath = fileExtension === "zip" ?
+        let sealPath = fileExtension === "zip" ?
             await toolCache.extractZip(file) :
             await toolCache.extractTar(file);
         core.info(`Extracted seal: ${sealPath}`);
+        // Support legacy versions
+        if (isLegacyVersion) {
+            sealPath = `${sealPath}/${fileName}`;
+        }
+        // Make file executable in MacOS and Linux
         if (platform !== "windows") {
             (0, fs_1.chmodSync)(path.join(sealPath, "seal"), 0o755);
         }
