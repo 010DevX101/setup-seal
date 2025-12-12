@@ -35452,7 +35452,7 @@ async function setup() {
         const platform = getPlatform();
         const architecture = os.arch();
         const fileExtension = (platform === "windows" || isLegacyVersion) ? "zip" : "tar.gz";
-        const fileName = `seal-${version}-${platform}-${architecture}`;
+        const fileName = `seal-${version}-${platform}-${architecture}.${fileExtension}`;
         let resolvedVersion;
         let downloadUrl;
         if (version == "latest") {
@@ -35479,7 +35479,7 @@ async function setup() {
         }
         else {
             resolvedVersion = version;
-            downloadUrl = `https://github.com/${REPOSITORY_OWNER}/${REPOSITORY_NAME}/releases/download/${version}/${fileName}.${fileExtension}`;
+            downloadUrl = `https://github.com/${REPOSITORY_OWNER}/${REPOSITORY_NAME}/releases/download/${version}/${fileName}`;
         }
         core.info(`Downloading seal from ${downloadUrl}`);
         const file = await toolCache.downloadTool(downloadUrl, undefined, token);
@@ -35488,10 +35488,6 @@ async function setup() {
             await toolCache.extractZip(file) :
             await toolCache.extractTar(file);
         core.info(`Extracted seal: ${sealPath}`);
-        // Support legacy versions
-        if (isLegacyVersion) {
-            sealPath = `${sealPath}/${fileName}`;
-        }
         // Make file executable in MacOS and Linux
         if (platform !== "windows") {
             (0, fs_1.chmodSync)(path.join(sealPath, "seal"), 0o755);
