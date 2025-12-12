@@ -48,7 +48,7 @@ async function setup() {
 		const architecture = os.arch();
 
 		const fileExtension = (platform === "windows" || isLegacyVersion) ? "zip" : "tar.gz";
-		const fileName = `seal-${version}-${platform}-${architecture}.${fileExtension}`;
+		const fileName = `seal-${version}-${platform}-${architecture}`;
 
 		let resolvedVersion: string;
 		let downloadUrl: string;
@@ -75,7 +75,7 @@ async function setup() {
 			downloadUrl = asset.browser_download_url;
 		} else {
 			resolvedVersion = version;
-			downloadUrl = `https://github.com/${REPOSITORY_OWNER}/${REPOSITORY_NAME}/releases/download/${version}/${fileName}`;
+			downloadUrl = `https://github.com/${REPOSITORY_OWNER}/${REPOSITORY_NAME}/releases/download/${version}/${fileName}.${fileExtension}`;
 		}
 		core.info(`Downloading seal from ${downloadUrl}`);
 		const file = await toolCache.downloadTool(downloadUrl, undefined, token);
