@@ -45,6 +45,7 @@ async function setup() {
 		const platform = getPlatform();
 		const architecture = os.arch();
 		const fileExtension = platform === "windows" ? "zip" : "tar.gz";
+		const fileName = `seal-${version}-${platform}-${architecture}.${fileExtension}`;
 		let resolvedVersion: string;
 		let downloadUrl: string;
 		if (version == "latest") {
@@ -70,15 +71,18 @@ async function setup() {
 			downloadUrl = asset.browser_download_url;
 		} else {
 			resolvedVersion = version;
-			downloadUrl = `https://github.com/${REPOSITORY_OWNER}/${REPOSITORY_NAME}/releases/download/${version}/seal-${version}-${platform}-${architecture}.${fileExtension}`;
+			downloadUrl = `https://github.com/${REPOSITORY_OWNER}/${REPOSITORY_NAME}/releases/download/${version}/${fileName}`;
 		}
 		core.info(`Downloading seal from ${downloadUrl}`);
 		const file = await toolCache.downloadTool(downloadUrl, undefined, token);
-		core.info("Successfully downloaded seal")
-		const sealPath = fileExtension === "zip" ?
+		core.info("Successfully downloaded seal");
+		let sealPath = fileExtension === "zip" ?
 			await toolCache.extractZip(file) :
 			await toolCache.extractTar(file);
 		core.info(`Extracted seal: ${sealPath}`);
+		if (version.includes("v0.0.5")) {
+			sealPath = `${sealPath}/${fileName}`;
+		}
 		if (platform !== "windows") {
 			chmodSync(path.join(sealPath, "seal"), 0o755);
 		}
